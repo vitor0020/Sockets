@@ -21,12 +21,12 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.conditions.ILootCondition;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameterSets;
-import net.minecraft.world.storage.loot.LootParameters;
-import net.minecraft.world.storage.loot.LootTable;
-import net.minecraft.world.storage.loot.conditions.ILootCondition;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 import nukeologist.sockets.api.SocketsAPI;
@@ -49,7 +49,7 @@ public class FortuneModifier extends LootModifier {
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
         final ItemStack tool = context.get(LootParameters.TOOL);
         //this conflicts with the smelt enchant. Maybe make it conflict in the loot condition JSON?
-        if (tool.getOrCreateTag().contains("socketsSmelt") && tool.getOrCreateTag().getBoolean("socketsSmelt"))
+        if (tool.getOrCreateTag().getBoolean("socketsSmelt"))
             return generatedLoot;
         //silk touch does not conform with abundance
         final Map<Enchantment, Integer> enchants = EnchantmentHelper.getEnchantments(tool);
@@ -57,6 +57,7 @@ public class FortuneModifier extends LootModifier {
             return generatedLoot;
         final boolean already = enchants.containsKey(Enchantments.FORTUNE);
         final ItemStack fakeTool = tool.copy();
+        fakeTool.getOrCreateTag().putBoolean("socketsFortune", false); //Makes sure we do not recursion-call this again
         final long level = SocketsAPI.getSockets(fakeTool)
                 .map(ISocketableItem::getStackHandler)
                 .map(i -> IntStream.range(0, i.getSlots())

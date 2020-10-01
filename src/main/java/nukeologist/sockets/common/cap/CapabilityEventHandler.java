@@ -28,6 +28,7 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import nukeologist.sockets.api.SocketsAPI;
@@ -46,16 +47,35 @@ public enum CapabilityEventHandler {
     INSTANCE;
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final LazyValue<Object2IntMap<String>> capItems = new LazyValue<>(CapabilityEventHandler::getCaps);
+
+    private static LazyValue<Object2IntMap<String>> capItems = makeLazy();
 
     @SubscribeEvent
     public void attachCap(AttachCapabilitiesEvent<ItemStack> event) {
         final ItemStack stack = event.getObject();
         if (stack.isEmpty()) return;
+        if (stack.getMaxStackSize() != 1) return;
         final Item item = stack.getItem();
         final int value = capItems.getValue().getInt(item.getRegistryName().toString());
-        if (value != 0)
+        if (value != 0) {
             event.addCapability(modLoc("socket"), CapabilitySocketableItem.createProvider(stack, value));
+        } else if ((item instanceof TieredItem || !stack.getToolTypes().isEmpty()) && Config.SERVER.enableAllTools.get()) {
+            event.addCapability(modLoc("socket"), CapabilitySocketableItem.createProvider(stack, 1));
+        } else if (item instanceof ArmorItem && Config.SERVER.enableAllArmor.get()) {
+            event.addCapability(modLoc("socket"), CapabilitySocketableItem.createProvider(stack, 1));
+        }
+    }
+
+    @SubscribeEvent
+    public void onConfigReload(ModConfig.Reloading event) {
+        if (event.getConfig().getModId().equals(SocketsAPI.ID)) {
+            LOGGER.debug(CORE, "Reloading Config...");
+            capItems = makeLazy();
+        }
+    }
+
+    private static LazyValue<Object2IntMap<String>> makeLazy() {
+        return new LazyValue<>(CapabilityEventHandler::getCaps);
     }
 
     private static Object2IntMap<String> getCaps() {
@@ -67,10 +87,10 @@ public enum CapabilityEventHandler {
             int value;
             try {
                 value = Integer.parseInt(pair[1]);
-            } catch (NumberFormatException e) {
+            } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
                 value = 1;
-                LOGGER.warn(CORE, "Failed to parse config value for \"{}\", setting it's number of sockets to 1", pair[0]);
-                LOGGER.error(CORE, "Exception: ", e);
+                LOGGER.warn(CORE, "Failed to parse config value for \"{}\", setting its number of sockets to 1", pair[0]);
+                LOGGER.error(CORE, "Cause: ", e);
             }
             map.putIfAbsent(pair[0], Math.max(Math.min(4, value), 1));
         }

@@ -54,7 +54,7 @@ public class LootModifierProvider implements IDataProvider {
     }
 
     protected void addLootModifiers() {
-        modifiers = GlobalLootModifiers.of(modLoc("smelting").toString(), modLoc("fortune").toString(), modLoc("enchantful").toString());
+        modifiers = GlobalLootModifiers.of(modLoc("smelting").toString(), modLoc("fortune").toString(), modLoc("enchantful").toString(), modLoc("chargeful").toString());
     }
 
     protected ResourceLocation modLoc(final String path) {
@@ -68,6 +68,7 @@ public class LootModifierProvider implements IDataProvider {
         save(cache, new ModifierTest("sockets:smelting", "{socketsSmelt:1b}", "minecraft:match_tool"), this.gen.getOutputFolder().resolve("data/" + modid + "/loot_modifiers/smelting.json"));
         save(cache, new ModifierTest("sockets:fortune", "{socketsFortune:1b}", "minecraft:match_tool"), this.gen.getOutputFolder().resolve("data/" + modid + "/loot_modifiers/fortune.json"));
         save(cache, new ModifierTest2("sockets:enchantful", "minecraft:chest", "minecraft:location_check"), this.gen.getOutputFolder().resolve("data/" + modid + "/loot_modifiers/enchantful.json"));
+        save(cache, new ModifierTest3("sockets:chargeful",  "minecraft:elder_guardian"), this.gen.getOutputFolder().resolve("data/" + modid + "/loot_modifiers/chargeful.json"));
     }
 
     /*Copy from LanguageProvider */
@@ -106,13 +107,13 @@ public class LootModifierProvider implements IDataProvider {
     //TEMPORARY, WIP
     protected static class ModifierTest {
 
-        private ModifierTest(String function, String nbt, String condition) {
-            this.function = function;
+        private ModifierTest(String type, String nbt, String condition) {
+            this.type = type;
             this.conditions = Collections.singletonList(new Condition(nbt, condition));
         }
 
+        private String type;
         private List<Condition> conditions;
-        private String function;
 
         private static class Condition {
 
@@ -135,13 +136,13 @@ public class LootModifierProvider implements IDataProvider {
 
     protected static class ModifierTest2 {
 
-        private ModifierTest2(String function, String block, String condition) {
-            this.function = function;
+        private ModifierTest2(String type, String block, String condition) {
+            this.type = type;
             this.conditions = Collections.singletonList(new ModifierTest2.Condition(block, condition));
         }
 
+        private String type;
         private List<ModifierTest2.Condition> conditions;
-        private String function;
 
         private static class Condition {
 
@@ -167,6 +168,31 @@ public class LootModifierProvider implements IDataProvider {
             private Dummy(String block) {
                 this.block = block;
             }
+        }
+
+    }
+
+    protected static class ModifierTest3 {
+
+        private ModifierTest3(String type, String id) {
+            this.type = type;
+            this.conditions = Collections.emptyList();
+            this.entity_type = id;
+        }
+
+        private String type;
+        private List<ModifierTest3.Condition> conditions;
+        private String entity_type;
+
+        private static class Condition {
+
+            private Condition(String condition, String id) {
+                this.condition = condition;
+                this.entity = id;
+            }
+            private String condition;
+            private String entity;
+
         }
 
     }

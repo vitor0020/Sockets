@@ -16,7 +16,9 @@
 
 package nukeologist.sockets.client.gui;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.resources.I18n;
@@ -24,6 +26,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import nukeologist.sockets.Sockets;
 import nukeologist.sockets.api.SocketStackHandler;
 import nukeologist.sockets.api.SocketsAPI;
@@ -43,16 +46,16 @@ public class SocketRemoverScreen extends ContainerScreen<SocketRemoverContainer>
     }
 
     @Override
-    public void render(int mouseX, int mouseY, float partialTicks) {
-        this.renderBackground();
-        super.render(mouseX, mouseY, partialTicks);
-        this.renderHoveredToolTip(mouseX, mouseY);
+    public void render(MatrixStack matrix, int mouseX, int mouseY, float partialTicks) {
+        this.renderBackground(matrix);
+        super.render(matrix, mouseX, mouseY, partialTicks);
+        this.func_230459_a_(matrix, mouseX, mouseY);
     }
 
     @Override
     protected void init() {
         super.init();
-        this.addButton(new Button(this.guiLeft + 20, this.guiTop + 10, 64, 20, I18n.format(StringTranslations.SOCKET_REMOVER_BUTTON), this::requestRemoval));
+        this.addButton(new Button(this.guiLeft + 20, this.guiTop + 10, 64, 20, new TranslationTextComponent(StringTranslations.SOCKET_REMOVER_BUTTON), this::requestRemoval));
     }
 
     private void requestRemoval(final Button button) {
@@ -65,13 +68,15 @@ public class SocketRemoverScreen extends ContainerScreen<SocketRemoverContainer>
             for (int i = 0; i < handler.getSlots(); i++) {
                 gems[i] = SocketsAPI.getGem(handler.getStackInSlot(i)).orElse(null);
             }
-            if (SocketRemoverTileEntity.allGemsAccept(gems, socket, this.minecraft.player)) {
+            final Minecraft mc = Minecraft.getInstance();
+            final SocketRemoverTileEntity te = this.container.getTile();
+            if (SocketRemoverTileEntity.allGemsAccept(gems, socket, mc.player) && te != null && mc.player.isCreative() || te.getTotalXp(gems, socket) <= mc.player.experienceLevel) {
                 final int slots = handler.getSlots();
                 for (int i = 1; i < 5 && i - 1 < slots; i++) {
                     final ItemStack gem = handler.getStackInSlot(i - 1);
                     if (!gem.isEmpty()) {
                         handler.setStackInSlot(i - 1, ItemStack.EMPTY);
-                        SocketsAPI.getGem(gem).ifPresent(g -> g.unequipped(socket, this.minecraft.player));
+                        SocketsAPI.getGem(gem).ifPresent(g -> g.unequipped(socket, mc.player));
                     }
                 }
             }
@@ -79,12 +84,28 @@ public class SocketRemoverScreen extends ContainerScreen<SocketRemoverContainer>
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+    protected void func_230450_a_(MatrixStack matrix, float partialTicks, int mouseX, int mouseY) {
         RenderSystem.color4f(1f, 1f, 1f, 1f);
-        this.minecraft.getTextureManager().bindTexture(TEXTURE);
+        Minecraft.getInstance().getTextureManager().bindTexture(TEXTURE);
         final int x = (this.width - this.xSize) / 2;
         final int y = (this.height - this.ySize) / 2;
-        this.blit(x, y, 0, 0, this.xSize, this.ySize);
+        this.blit(matrix, x, y, 0, 0, this.xSize, this.ySize);
+    }
+
+    @Override   //Mostly copied from Anvil Screen
+    protected void func_230451_b_(MatrixStack matrix, int mouseX, int mouseY) {
+        final SocketRemoverTileEntity te = this.container.getTile();
+        final Minecraft mc = Minecraft.getInstance();
+        final int xp = te == null ? 0 : te.getTotalXp();
+        if (xp <= 0) return;
+        final String s = I18n.format("container.repair.cost", xp);
+        int k = this.xSize - 8 - this.font.getStringWidth(s) - 2;
+        int j = 8453920;
+        if (mc.player != null && !mc.player.isCreative() && mc.player.experienceLevel < xp) {
+            j = 16736352;
+        }
+        fill(matrix, k - 2, 67, this.xSize - 8, 79, 0x4f000000);
+        this.font.drawStringWithShadow(matrix, s, (float)k, 69.0F, j);
     }
 
     @Override

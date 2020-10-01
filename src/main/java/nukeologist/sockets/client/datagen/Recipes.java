@@ -20,7 +20,7 @@ import net.minecraft.block.Block;
 import net.minecraft.data.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.tags.Tag;
+import net.minecraft.tags.ITag;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.crafting.conditions.IConditionBuilder;
 import nukeologist.sockets.common.registry.SocketsBlocks;
@@ -49,14 +49,15 @@ public class Recipes extends RecipeProvider implements IConditionBuilder {
         defaultGem(SocketsItems.SAPPHIRE_GEM, SocketsTags.Items.STORAGE_BLOCKS_SAPPHIRE, SocketsTags.Items.GEMS_SAPPHIRE, "has_sapphire", consumer);
 
         ShapedRecipeBuilder.shapedRecipe(SocketsBlocks.SOCKET_REMOVER.get()).key('#', SocketsTags.Items.GEMS).key('@', Items.ANVIL).patternLine("###").patternLine("#@#").patternLine("###").addCriterion("has_anvil", hasItem(Items.ANVIL)).build(consumer);
+        ShapelessRecipeBuilder.shapelessRecipe(SocketsItems.CHARGEFUL_GEM.get()).addIngredient(SocketsItems.ENCHANTFUL_GEM.get()).addIngredient(Items.TRIDENT).addCriterion("has_enchantful", hasItem(SocketsItems.ENCHANTFUL_GEM.get())).build(consumer);
     }
 
-    private void compactBlock(final Supplier<Block> block, final Tag<Item> itemTag, final Tag<Item> blockTag, final Supplier<Item> reverse, final String itemCriterion, final String blockCriterion, final Consumer<IFinishedRecipe> consumer) {
+    private void compactBlock(final Supplier<Block> block, final ITag.INamedTag<Item> itemTag, final ITag.INamedTag<Item> blockTag, final Supplier<Item> reverse, final String itemCriterion, final String blockCriterion, final Consumer<IFinishedRecipe> consumer) {
         ShapedRecipeBuilder.shapedRecipe(block.get()).key('#', itemTag).patternLine("###").patternLine("###").patternLine("###").addCriterion(itemCriterion, hasItem(itemTag)).build(consumer);
         ShapelessRecipeBuilder.shapelessRecipe(reverse.get(), 9).addIngredient(blockTag).addCriterion(blockCriterion, hasItem(blockTag)).build(consumer);
     }
 
-    private void defaultGem(final Supplier<Item> gem, final Tag<Item> blockTag, final Tag<Item> gemTag, final String criterion, final Consumer<IFinishedRecipe> consumer) {
+    private void defaultGem(final Supplier<Item> gem, final ITag.INamedTag<Item> blockTag, final ITag.INamedTag<Item> gemTag, final String criterion, final Consumer<IFinishedRecipe> consumer) {
         ShapedRecipeBuilder.shapedRecipe(gem.get()).key('#', blockTag).key('@', gemTag).patternLine("#@#").patternLine("@#@").patternLine("#@#").addCriterion(criterion, hasItem(gemTag)).build(consumer);
     }
 }

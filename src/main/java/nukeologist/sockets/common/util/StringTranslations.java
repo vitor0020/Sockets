@@ -25,6 +25,7 @@ public final class StringTranslations {
     //Item Tooltips
     public static final String ENCHANTFUL_TOOLTIP = "tooltip.sockets.enchantful_gem";
     public static final String ENCHANTFUL_EXTRA_TOOLTIP = "tooltip.sockets.extra.enchantful_gem";
+    public static final String SHIFT_KEY_DOWN = "tooltip.sockets.shift_key";
 
     //Gem Tooltips
     public static final String DEFAULT_GEM_EXTRA_TOOLTIP = "tooltip.sockets.extra.default";
@@ -36,6 +37,7 @@ public final class StringTranslations {
     public static final String LAZULI_GEM_JEI = "info.sockets.jei.lazuli_gem";
     public static final String RUBY_GEM_JEI = "info.sockets.jei.ruby_gem";
     public static final String SAPPHIRE_GEM_JEI = "info.sockets.jei.sapphire_gem";
+    public static final String CHARGEFUL_GEM_JEI = "info.sockets.jei.chargeful_gem";
 
     //SocketRemover
     public static final String SOCKET_REMOVER_BUTTON = "button.sockets.socket_remover1";

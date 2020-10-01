@@ -17,35 +17,46 @@
 package nukeologist.sockets.common.loot;
 
 import com.google.gson.JsonObject;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.loot.conditions.ILootCondition;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
 import nukeologist.sockets.common.config.Config;
 import nukeologist.sockets.common.registry.SocketsItems;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 
-public class DungeonModifier extends LootModifier {
+public class MobModifier extends LootModifier {
 
-    public DungeonModifier(ILootCondition[] conditionsIn) {
+    private final ResourceLocation entityLoc;
+
+    public MobModifier(ILootCondition[] conditionsIn, ResourceLocation entityLoc) {
         super(conditionsIn);
+        this.entityLoc = entityLoc;
     }
 
+    @Nonnull
+    @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
-        if (context.getRandom().nextInt(100) < Config.SERVER.dungeonEnchantfulChance.get()) {
-            generatedLoot.add(new ItemStack(SocketsItems.ENCHANTFUL_GEM.get()));
+        final Entity entity = context.get(LootParameters.THIS_ENTITY);
+        if (entity != null && entityLoc.equals(entity.getType().getRegistryName()) && context.getRandom().nextInt(100) < Config.SERVER.chargefulChance.get()) {
+            generatedLoot.add(new ItemStack(SocketsItems.CHARGEFUL_GEM.get()));
         }
         return generatedLoot;
     }
 
-    public static class Serializer extends GlobalLootModifierSerializer<DungeonModifier> {
+    public static class Serializer extends GlobalLootModifierSerializer<MobModifier> {
 
         @Override
-        public DungeonModifier read(ResourceLocation location, JsonObject object, ILootCondition[] conditions) {
-            return new DungeonModifier(conditions);
+        public MobModifier read(ResourceLocation location, JsonObject object, ILootCondition[] ailootcondition) {
+            final ResourceLocation rl = new ResourceLocation(JSONUtils.getString(object, "entity_type"));
+            return new MobModifier(ailootcondition, rl);
         }
     }
 }

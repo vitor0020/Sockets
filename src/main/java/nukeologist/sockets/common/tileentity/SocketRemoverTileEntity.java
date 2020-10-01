@@ -16,6 +16,7 @@
 
 package nukeologist.sockets.common.tileentity;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -107,17 +108,12 @@ public class SocketRemoverTileEntity extends TileEntity implements INamedContain
         final SocketStackHandler handler = socket.getStackHandler();
         if (!acceptsRemoval(handler)) return;
         final IGem[] gems = new IGem[handler.getSlots()];
-        int xp = 0;
         for (int i = 0; i < handler.getSlots(); i++) {
             gems[i] = SocketsAPI.getGem(handler.getStackInSlot(i)).orElse(null);
         }
-        for (final IGem gem : gems) {
-            if (gem != null) {
-                xp += gem.xpForRemoval(socket);
-            }
-        }
+        int xp = getTotalXp(gems, socket);
         if (xp > 0) {
-            if (player.experienceTotal >= xp && allGemsAccept(gems, socket, player)) {
+            if (player.experienceLevel >= xp || player.isCreative() && allGemsAccept(gems, socket, player)) {
                 player.addExperienceLevel(-xp);
                 removeSockets(handler, socket, player);
             }
@@ -125,6 +121,31 @@ public class SocketRemoverTileEntity extends TileEntity implements INamedContain
             if (allGemsAccept(gems, socket, player))
                 removeSockets(handler, socket, player);
         }
+    }
+
+    public int getTotalXp() {
+        final ItemStack input = inv.getStackInSlot(0);
+        if (input.isEmpty()) return 0;
+        final LazyOptional<ISocketableItem> possible = SocketsAPI.getSockets(input);
+        if (!possible.isPresent()) return 0;
+        final ISocketableItem socket = possible.orElseThrow(IllegalStateException::new);
+        final SocketStackHandler handler = socket.getStackHandler();
+        if (!acceptsRemoval(handler)) return 0;
+        final IGem[] gems = new IGem[handler.getSlots()];
+        for (int i = 0; i < handler.getSlots(); i++) {
+            gems[i] = SocketsAPI.getGem(handler.getStackInSlot(i)).orElse(null);
+        }
+        return getTotalXp(gems, socket);
+    }
+
+    public int getTotalXp(final IGem[] gems, final ISocketableItem socket) {
+        int xp = 0;
+        for (final IGem gem : gems) {
+            if (gem != null) {
+                xp += gem.xpForRemoval(socket);
+            }
+        }
+        return xp;
     }
 
     private void removeSockets(final SocketStackHandler handler, final ISocketableItem item, final ServerPlayerEntity player) {
@@ -167,8 +188,8 @@ public class SocketRemoverTileEntity extends TileEntity implements INamedContain
     }
 
     @Override
-    public void read(CompoundNBT compound) {
-        super.read(compound);
+    public void read(BlockState useless, CompoundNBT compound) {
+        super.read(useless, compound);
         inv.deserializeNBT(compound.getCompound("inv"));
     }
 

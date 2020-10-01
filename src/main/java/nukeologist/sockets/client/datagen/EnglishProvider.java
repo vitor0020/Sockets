@@ -53,12 +53,21 @@ public class EnglishProvider extends LanguageProvider {
         add(SocketsItems.SAPPHIRE, "Sapphire");
         add(SocketsItems.RUBY_GEM, "Ruby Gem");
         add(SocketsItems.SAPPHIRE_GEM, "Sapphire Gem");
+        add(SocketsItems.CHARGEFUL_GEM, "Chargeful Gem");
 
         add("itemGroup.sockets", "Sockets");
 
         add(StringTranslations.ENCHANTFUL_TOOLTIP, "Enchant this Gem and it's socket shall be as well.");
         add(StringTranslations.ENCHANTFUL_EXTRA_TOOLTIP, "Enchanted by Enchantful Gem");
         add(StringTranslations.DEFAULT_GEM_EXTRA_TOOLTIP, "Contains Gems: ");
+        add(StringTranslations.SHIFT_KEY_DOWN, "[SHIFT] for more.");
+
+        tooltip(SocketsItems.DIAMOND_GEM, "+1 damage; +1 protection");
+        tooltip(SocketsItems.EMERALD_GEM, "More xp on ore breaking");
+        tooltip(SocketsItems.LAZULI_GEM, "+1 fortune");
+        tooltip(SocketsItems.RUBY_GEM, "Auto Smelting");
+        tooltip(SocketsItems.SAPPHIRE_GEM, "+1 looting");
+        tooltip(SocketsItems.CHARGEFUL_GEM, "Possible lightning!");
 
         //Jei
         add(StringTranslations.DIAMOND_GEM_JEI, "Adds damage when socketed into a tool/weapon. Resists some damage in armor.");
@@ -67,10 +76,15 @@ public class EnglishProvider extends LanguageProvider {
         add(StringTranslations.LAZULI_GEM_JEI, "Adds fortune when socketed into a tool/weapon.");
         add(StringTranslations.RUBY_GEM_JEI, "Adds auto smelting when socketed into a tool.");
         add(StringTranslations.SAPPHIRE_GEM_JEI, "Adds looting when socketed into a tool/weapon.");
+        add(StringTranslations.CHARGEFUL_GEM_JEI, "Adds a chance for lightnings when socketed into a tool/weapon, and attacking.");
     }
 
     private void add(final Supplier<Item> item, final String name) {
         add(item.get(), name);
+    }
+
+    private void tooltip(final Supplier<Item> item, final String tooltip) {
+        add(item.get().getTranslationKey() + ".shift.info", tooltip);
     }
 
     private void block(final Supplier<Block> item, final String name) {

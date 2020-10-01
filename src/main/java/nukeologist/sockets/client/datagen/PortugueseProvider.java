@@ -53,12 +53,21 @@ public class PortugueseProvider extends LanguageProvider {
         add(SocketsItems.SAPPHIRE, "Safira");
         add(SocketsItems.RUBY_GEM, "Gema de Rubi");
         add(SocketsItems.SAPPHIRE_GEM, "Gema de Safira");
+        add(SocketsItems.CHARGEFUL_GEM, "Gema Carregada");
 
         add("itemGroup.sockets", "Soquetes");
 
         add(StringTranslations.ENCHANTFUL_TOOLTIP, "Encante esta Gema e seu soquete tamb\u00E9m ser\u00E1.");
         add(StringTranslations.ENCHANTFUL_EXTRA_TOOLTIP, "Encantado pela Gema Encant\u00E1vel");
         add(StringTranslations.DEFAULT_GEM_EXTRA_TOOLTIP, "Gemas Contidas: ");
+        add(StringTranslations.SHIFT_KEY_DOWN, "[SHIFT] para mais.");
+
+        tooltip(SocketsItems.DIAMOND_GEM, "+1 dano; +1 prote\u00E7\u00E3o");
+        tooltip(SocketsItems.EMERALD_GEM, "Mais xp quebrando min\u00E9rio");
+        tooltip(SocketsItems.LAZULI_GEM, "+1 fortuna");
+        tooltip(SocketsItems.RUBY_GEM, "Autocozimento");
+        tooltip(SocketsItems.SAPPHIRE_GEM, "+1 saque");
+        tooltip(SocketsItems.CHARGEFUL_GEM, "Poss\u00EDvel Raio!");
 
         //Jei
         add(StringTranslations.DIAMOND_GEM_JEI, "Adiciona dano quando dentro de ferramenta/arma. Reduz danos quando em armaduras.");
@@ -67,10 +76,15 @@ public class PortugueseProvider extends LanguageProvider {
         add(StringTranslations.LAZULI_GEM_JEI, "Adiciona fortuna quando dentro de ferramenta/arma.");
         add(StringTranslations.RUBY_GEM_JEI, "Adiciona autocozimento quando dentro de ferramenta.");
         add(StringTranslations.SAPPHIRE_GEM_JEI, "Adiciona saque quando dentro de ferramenta/arma.");
+        add(StringTranslations.CHARGEFUL_GEM_JEI, "Adiciona uma chance de raios quando dentro de ferramenta/arma, e atacando.");
     }
 
     private void add(final Supplier<Item> item, final String name) {
         add(item.get(), name);
+    }
+
+    private void tooltip(final Supplier<Item> item, final String tooltip) {
+        add(item.get().getTranslationKey() + ".shift.info", tooltip);
     }
 
     private void block(final Supplier<Block> item, final String name) {
